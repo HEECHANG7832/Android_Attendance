@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="100dp"
+    android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/listview_subject_num"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="강의번호 : CSE-4036"
+            android:textSize="16dp"
+            android:gravity = "center_vertical"
+            android:layout_centerVertical="true"
+            android:layout_alignStart="@+id/listview_subject_name" />
+
+        <TextView
+            android:id="@+id/listview_subject_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="소프트웨어 공학"
+            android:textSize="16dp"
+            android:gravity = "center_vertical"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="22dp"
+            android:layout_marginTop="13dp" />
+
+
+
+        <TextView
+            android:id="@+id/listview_subject_day"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="월 1교시, 수 4교시"
+            android:layout_below="@+id/listview_BT_start"
+            android:layout_alignStart="@+id/listview_subject_num" />
+
+        <TextView
+            android:id="@+id/listview_subject_week"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="3주차"
+            android:layout_below="@+id/listview_BT_start"
+            android:layout_alignStart="@+id/listview_subject_professor" />
+
+        <TextView
+            android:id="@+id/listview_subject_professor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="담당교수 : 최은만"
+            android:layout_toEndOf="@+id/listview_subject_num"
+            android:layout_marginStart="44dp"
+            android:layout_alignTop="@+id/listview_subject_name" />
+
+
+        <Button
+            android:id="@+id/listview_BT_start"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="25dp"
+            android:text="출석시작" />
+
+</RelativeLayout>

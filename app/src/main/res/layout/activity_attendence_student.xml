@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:id="@+id/as_student_info_layout"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_margin="10dp">
+
+            <TextView
+                android:id="@+id/as_student_num_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginStart="111dp"
+                android:layout_marginTop="11dp"
+                android:text="학번" />
+
+            <TextView
+                android:id="@+id/as_student_name_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="이름"
+                android:layout_centerVertical="true"
+                android:layout_alignStart="@+id/as_student_num_textview" />
+
+            <TextView
+                android:id="@+id/as_student_department_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="학과"
+                android:layout_alignParentBottom="true"
+                android:layout_alignStart="@+id/as_student_name_textview"
+                android:layout_marginBottom="9dp" />
+
+
+
+            <ImageView
+                android:id="@+id/as_student_image_imageview"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                app:srcCompat="@drawable/person"
+                android:layout_centerVertical="true"
+                android:layout_alignParentStart="true" />
+
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/textview112"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:gravity="center_vertical|center_horizontal"
+            android:text="출석체크 가능한 과목" />
+
+        <ListView
+            android:id="@+id/as_subject_listview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </LinearLayout>
+
+</RelativeLayout>

@@ -6,5 +6,5 @@ package com.example.heechang.attendence;
 
 public class listview_student {
     public String name;
-    public String status;
+    public String state;
 }

@@ -91,6 +91,7 @@ public class Request_Professor extends AppCompatActivity {
 
                         InputStream is = conn.getInputStream();
                         bitmap = BitmapFactory.decodeStream(is);
+                        Log.i(TAG, "6.jpg success");
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -133,7 +134,7 @@ public class Request_Professor extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         //수업정보 가져오기
-        GetData task = new GetData(this, new GetData.AsyncResponse() {
+        InsertData task = new InsertData(this, new InsertData.AsyncResponse() {
             @Override
             public void getResult(String mJsonString) {
                 Log.i(TAG, mJsonString);
@@ -177,8 +178,9 @@ public class Request_Professor extends AppCompatActivity {
                 }
             }
         });
-        //Request_Professor.php ==> select * from lecture;
-        task.execute("http://220.230.117.98/se/Request_Professor.php");
+        //Request_Professor.php ==> $sql="select * from lecture where LecPid = '$LecPid'";
+        task.execute("http://220.230.117.98/se/login.php", "LecPid=profchoi");
+
     }
 
     public class ListviewAdapter extends BaseAdapter{

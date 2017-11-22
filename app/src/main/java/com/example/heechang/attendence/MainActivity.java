@@ -140,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 // TODO Auto-generated method stub
-                Intent i = new Intent(MainActivity.this, Request_Professor.class);
+                Intent i = new Intent(MainActivity.this, Login.class);
                 startActivity(i);
             }
         }, 3000); // 3초

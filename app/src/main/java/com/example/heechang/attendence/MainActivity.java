@@ -56,19 +56,26 @@ public class MainActivity extends AppCompatActivity {
     private Runnable myRunner;
 
 
-    private TextView mTextViewResult;
-
-    private Context context;
-
-    public String a;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //mTextViewResult = (TextView) findViewById(R.id.main_textview);
-        context = this;
+        /*
+            3초후 Login 페이지로
+         */
+        timeHandler = new Handler(); //Handler 클래스 추가
+        timeHandler.postDelayed(myRunner=new Runnable() {
+            @Override
+            public void run() {
+                // TODO Auto-generated method stub
+                Intent i = new Intent(MainActivity.this, Login.class);
+                startActivity(i);
+            }
+        }, 3000); // 3초
+    }
+}
+
 
         /*
         php 에서 db쿼리 실행시켜서 결과를 json형식으로 가져오는 sample코드
@@ -130,23 +137,6 @@ public class MainActivity extends AppCompatActivity {
 //                task.execute("http://220.230.117.98/se/example3.php", "name=" + "1" + "&author=" + "fuck");
 //            }
 //        });
-
-
-        /*
-            3초후 Login 페이지로
-         */
-        timeHandler = new Handler(); //Handler 클래스 추가
-        timeHandler.postDelayed(myRunner=new Runnable() {
-            @Override
-            public void run() {
-                // TODO Auto-generated method stub
-                Intent i = new Intent(MainActivity.this, Login.class);
-                startActivity(i);
-            }
-        }, 3000); // 3초
-    }
-}
-
 
 
 

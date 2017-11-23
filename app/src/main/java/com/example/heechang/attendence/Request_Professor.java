@@ -67,13 +67,13 @@ public class Request_Professor extends AppCompatActivity {
         context = this;
 
         rp_professor_num_textview = (TextView)findViewById(R.id.rp_professor_num_textview);
-        rp_professor_num_textview.setText(P.id.toString());
+        rp_professor_num_textview.setText("교수번호 : "+P.id.toString());
         //이름
         rp_professor_name_textview = (TextView)findViewById(R.id.rp_professor_name_textview);
-        rp_professor_name_textview.setText(P.name.toString());
+        rp_professor_name_textview.setText("교수이름 : "+P.name.toString());
         //부서
         rp_professor_department_textview = (TextView)findViewById(R.id.rp_professor_department_textview);
-        rp_professor_department_textview.setText(P.department.toString());
+        rp_professor_department_textview.setText("학과명 : "+P.department.toString());
 
         Thread mThread = new Thread(){
             @Override

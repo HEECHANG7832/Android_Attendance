@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="#FFFFFF"
     tools:context="com.example.heechang.attendence.MainActivity">
 
     <ImageView
@@ -11,6 +12,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:srcCompat="@drawable/dongguk"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
         tools:layout_editor_absoluteX="0dp"
         tools:layout_editor_absoluteY="0dp" />
 
@@ -29,11 +32,21 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="동국대학교 출석 도우미"
-        android:textSize="50dp"
+        android:textSize="30dp"
         tools:layout_editor_absoluteY="455dp"
         tools:layout_editor_absoluteX="56dp"
+        android:layout_marginBottom="9dp"
+        android:layout_above="@+id/textView3"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="57dp"
+        android:text="(c) Copyright ** Corp. 2017, All Rights Reserved."
+        android:textSize="15dp"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="64dp" />
+        android:layout_centerHorizontal="true" />
 
 </RelativeLayout>

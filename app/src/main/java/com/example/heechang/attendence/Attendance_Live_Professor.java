@@ -50,14 +50,49 @@ public class Attendance_Live_Professor extends AppCompatActivity {
     private TimerTask timerTask;
     private Timer timer;
 
+    TextView rp_professor_timer;
+    TextView rp_professor_ongoing;
+
+    private int count = 600;
+
     private listviewitem Listviewitem;
     private Context context;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_attendance_live_professor);
+
+        rp_professor_timer = (TextView) findViewById(R.id.rp_professor_timer);
+
+        TimerTask timerTask2 = new TimerTask() {
+            @Override
+            public void run() {
+                if(count!=0)
+                {
+                    count--;
+                    runOnUiThread(new Runnable(){
+                        @Override
+                        public void run() {
+                            rp_professor_timer.setText("남은시간 : "+Integer.toString(count/60)+"분 "+Integer.toString(count%60)+"초");
+                        }
+                    });
+                }else{
+                    InsertData task = new InsertData(context, new InsertData.AsyncResponse() {
+                        @Override
+                        public void getResult(String mJsonString) {
+                            if(mJsonString.equals("success"))
+                                Log.i(TAG, "ongoing=0 success");
+                        }
+                    });
+                    //lecnum에 해당하는 수업의 ongoing을 0로 바꿔준다.
+                    task.execute("http://220.230.117.98/se/ongoing.php", "Lecnum="+Listviewitem.Lecnum+"&ongoing=0");
+                    finish();
+                }
+            }
+        };
+        Timer timer2 = new Timer();
+        timer2.schedule(timerTask2,0, 1000);
 
         context = this;
 
@@ -109,7 +144,7 @@ public class Attendance_Live_Professor extends AppCompatActivity {
         TextView include_professor = (TextView) test1View.findViewById(R.id.listview_subject_professor);
         include_professor.setText(Listviewitem.professor);
 
-        TextView rp_professor_ongoing = (TextView) test1View.findViewById(R.id.rp_professor_ongoing);
+        rp_professor_ongoing = (TextView) findViewById(R.id.rp_professor_ongoing);
         rp_professor_ongoing.setText("인증번호 : "+Listviewitem.ongoing);
 
         Button cancel = (Button) test1View.findViewById(R.id.listview_BT_start);
@@ -130,6 +165,7 @@ public class Attendance_Live_Professor extends AppCompatActivity {
                 });
                 //lecnum에 해당하는 수업의 ongoing을 0로 바꿔준다.
                 task.execute("http://220.230.117.98/se/ongoing.php", "Lecnum="+Listviewitem.Lecnum+"&ongoing=0");
+                finish();
             }
         });
 
@@ -204,7 +240,7 @@ public class Attendance_Live_Professor extends AppCompatActivity {
                         }
                     }
                 });
-                task.execute("http://220.230.117.98/se/bring_attendance_info.php", "tableInfo=" + Listviewitem.Lecnum + "&episode=1");
+                task.execute("http://220.230.117.98/se/bring_attendance_info.php", "tableInfo=" + Listviewitem.Lecnum + "&episode="+episode);
 
             }
         };
@@ -261,20 +297,40 @@ public class Attendance_Live_Professor extends AppCompatActivity {
                                 listview_student_status.setText("x");
                         }
                     });
-                    //lecnum에 해당하는 수업의 ongoing을 0로 바꿔준다.
-                    task.execute("http://220.230.117.98/se/set_state_prof.php", "lecture="+Listviewitem.Lecnum+"&state=x&studentid="+Listview_student.name+"&episode=1");
+                    task.execute("http://220.230.117.98/se/set_state_prof.php",
+                            "lecture="+Listviewitem.Lecnum+"&state=x&studentid="+Listview_student.name+"&episode="+episode);
                 }
             });
             Button ls_BT_late = (Button) convertView.findViewById(R.id.ls_BT_late);
             ls_BT_late.setOnClickListener(new Button.OnClickListener() {
                 public void onClick(View v) {
                     //state --> a
+                    InsertData task = new InsertData(context, new InsertData.AsyncResponse() {
+                        @Override
+                        public void getResult(String mJsonString) {
+                            Log.i(TAG, mJsonString); //success of failure
+                            if(mJsonString.equals("success"))
+                                listview_student_status.setText("a");
+                        }
+                    });
+                    task.execute("http://220.230.117.98/se/set_state_prof.php",
+                            "lecture="+Listviewitem.Lecnum+"&state=a&studentid="+Listview_student.name+"&episode="+episode);
                 }
             });
             Button ls_BT_attendance = (Button) convertView.findViewById(R.id.ls_BT_attendance);
             ls_BT_attendance.setOnClickListener(new Button.OnClickListener() {
                 public void onClick(View v) {
                     //state --> o
+                    InsertData task = new InsertData(context, new InsertData.AsyncResponse() {
+                        @Override
+                        public void getResult(String mJsonString) {
+                            Log.i(TAG, mJsonString); //success of failure
+                            if(mJsonString.equals("success"))
+                                listview_student_status.setText("o");
+                        }
+                    });
+                    task.execute("http://220.230.117.98/se/set_state_prof.php",
+                            "lecture="+Listviewitem.Lecnum+"&state=o&studentid="+Listview_student.name+"&episode="+episode);
                 }
             });
 

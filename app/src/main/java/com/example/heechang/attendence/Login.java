@@ -36,7 +36,7 @@ public class Login extends AppCompatActivity {
     private Button login_quit_button;
     private Context context;
     public static boolean logined = false;
-    private String result = "시발";
+    private String result;
 
     public static final Person P = new Person();
 
@@ -58,6 +58,7 @@ public class Login extends AppCompatActivity {
 
                 final String IDtemp = login_id_editText.getText().toString();
                 String Passwordtemp = md5(login_pw_editText.getText().toString());
+
                 InsertData task = new InsertData(context, new InsertData.AsyncResponse() {
                     @Override
                     public void getResult(String mJsonString) {
@@ -100,12 +101,7 @@ public class Login extends AppCompatActivity {
         });
     }
 
-    public void onQuit(View v)
-    {
-        moveTaskToBack(true);
-        finish();
-        android.os.Process.killProcess(android.os.Process.myPid());
-    }
+
     public String md5(String s) {
         try {
             // Create MD5 Hash

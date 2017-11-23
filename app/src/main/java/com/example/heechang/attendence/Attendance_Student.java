@@ -1,6 +1,7 @@
 package com.example.heechang.attendence;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -9,7 +10,9 @@ import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.location.Location;
 import android.os.Bundle;
+import android.renderscript.ScriptGroup;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Display;
@@ -18,18 +21,25 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.io.File;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import android.Manifest;
@@ -48,6 +58,7 @@ import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.util.Locale;
+import java.util.StringTokenizer;
 
 
 import static com.example.heechang.attendence.Login.P;
@@ -74,6 +85,16 @@ public class Attendance_Student extends AppCompatActivity implements Locationinf
     private int current_location;
     private Bitmap bitmap;
 
+    private Calendar calendar;
+    private String episode;
+    private String startdate;
+    private String currentdate;
+
+    private boolean cheating = false;
+
+
+    private List<String> fakeGPSList;
+
     private double latPoint;
     private double lngPoint;
     private double endlatitude;
@@ -83,6 +104,57 @@ public class Attendance_Student extends AppCompatActivity implements Locationinf
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_attendence_student);
+
+        context = this;
+
+        calendar = new GregorianCalendar(Locale.KOREA);
+        currentdate = Integer.toString(calendar.get(Calendar.YEAR)) + "-" + Integer.toString(calendar.get(Calendar.MONTH)) + "-" + Integer.toString(calendar.get(Calendar.DAY_OF_MONTH));
+        startdate = "2017-09-06";
+
+        try {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+            Date beginDate = formatter.parse(startdate);
+            Date endDate = formatter.parse(currentdate);
+
+            // 시간차이를 시간,분,초를 곱한 값으로 나누면 하루 단위가 나옴
+            long diff = endDate.getTime() - beginDate.getTime();
+            long diffDays = diff / (24 * 60 * 60 * 1000);
+
+            if(diffDays%7 == 0)
+            {
+                episode = Integer.toString((int)diffDays/7 * 2 + 1);
+            }
+            else
+            {
+                episode = Integer.toString((int)diffDays/7 * 2 + 2);
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        Log.e("episode", episode);
+        String gpsfake ="";
+
+
+        InputStream inputStream = context.getResources().openRawResource(R.raw.gpsfake);
+        while(true){
+            try {
+                int temp = inputStream.read();
+                if(temp == -1)
+                {
+                    break;
+                }
+                gpsfake = gpsfake + Character.toString((char)temp);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        StringTokenizer strToken =  new StringTokenizer(gpsfake,",");
+
+        fakeGPSList = new ArrayList<>();
+        while(strToken.hasMoreTokens())
+        {
+            fakeGPSList.add(strToken.nextToken());
+        }
 
         //전역변수 P를 사용해서 학생정보 출력하기
         //학번
@@ -131,15 +203,11 @@ public class Attendance_Student extends AppCompatActivity implements Locationinf
 
         }
 
-
-
-        //페어링 목록 출력하는 ListView
         as_subject_listview = (ListView) findViewById(R.id.as_subject_listview);
         adapter = new ListviewAdapter();
         as_subject_listview.setAdapter(adapter);
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        context = this;
 
 //        //학생넘버를 이용해서
 //        while (true)
@@ -208,9 +276,7 @@ public class Attendance_Student extends AppCompatActivity implements Locationinf
                         //hArrayList.add(hashMap);
 
                         //리스트뷰에 어뎁터 통해서 추가
-                        if (Integer.parseInt(ongoing) == 1) {
                             adapter.addItem(Lecnum, Lecname, Lecday, LecPid);
-                        }
                     }
 
                 } catch (JSONException e) {
@@ -220,7 +286,7 @@ public class Attendance_Student extends AppCompatActivity implements Locationinf
             }
         });
         //Request_Professor.php ==> select * from lecture;
-        task.execute("http://220.230.117.98/se/Request_Professor.php");
+        task.execute("http://220.230.117.98/se/Request_Student.php"); //똑같아서 그냥 이 php 사용
     }
 
     public class ListviewAdapter extends BaseAdapter {
@@ -321,6 +387,13 @@ public class Attendance_Student extends AppCompatActivity implements Locationinf
         protected TextView dialog_TV_lecweek;
         protected TextView dialog_TV_lecgps;
 
+        protected List<ActivityManager.RunningAppProcessInfo> appList;
+        protected List<String> processNameList;
+
+        protected ActivityManager manager;
+
+
+
         private Button dialog_button_submit;
 
         private listviewitem listviewitem;
@@ -336,8 +409,37 @@ public class Attendance_Student extends AppCompatActivity implements Locationinf
             requestWindowFeature(Window.FEATURE_NO_TITLE); //타이틀 바 삭제
             setContentView(R.layout.dialog);
 
+            manager = (ActivityManager)getSystemService(ACTIVITY_SERVICE);
+            appList = manager.getRunningAppProcesses();
+
+            processNameList = new ArrayList<String>();
+
+            for(int i=0;i<appList.size();i++) {
+                ActivityManager.RunningAppProcessInfo App = appList.get(i);
+
+                processNameList.add(App.processName);
+            }
+
+            for(int i=0;i<processNameList.size();i++)
+            {
+                Log.e("process name: ",processNameList.get(i));
+                for(int j=0;j<fakeGPSList.size();j++)
+                {
+                    Log.e("fake name: ", fakeGPSList.get(j));
+                    if(processNameList.get(i).equals(fakeGPSList.get(j)))
+                    {
+                        cheating = true;
+                        Toast.makeText(context,"장난질발견",Toast.LENGTH_LONG).show();
+                        break;
+                    }
+                }
+            }
+
+
+
+
             isGPSEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-            isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER); //gps와 network 확인
+            //isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER); //gps와 network 확인
 
 
             //클릭된 리스트뷰로부터 정보를 받아 각 dialog의 각 textview에 출력
@@ -349,7 +451,7 @@ public class Attendance_Student extends AppCompatActivity implements Locationinf
             dialog_TV_professor.setText(listviewitem.professor);
 
             dialog_TV_lecgps = (TextView) findViewById(R.id.dialog_TV_lecgps);
-            dialog_TV_lecgps.setText("gps 확인로직 여기에 추가");
+            dialog_TV_lecgps.setText("위치인증 완료전...");
             dialog_button_submit = (Button) findViewById(R.id.dialog_button_submit);
 
 
@@ -357,12 +459,33 @@ public class Attendance_Student extends AppCompatActivity implements Locationinf
             dialog_button_submit.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    //출석 승인 쿼리 날리기
+
+
+                    InsertData task = new InsertData(context, new InsertData.AsyncResponse() {
+                        @Override
+                        public void getResult(String mJsonString) {
+                            if(mJsonString.equals("success"))
+                            {
+                                Toast.makeText(context,"출석체크성공",Toast.LENGTH_LONG).show();
+                                dismiss();
+                            }
+                            else
+                            {
+                                Toast.makeText(context,"출석체크실패 다시 시도해주세요",Toast.LENGTH_LONG).show();
+                                dismiss();
+                            }
+                        }
+                    });
+                    task.execute("http://220.230.117.98/se/set_state_prof.php", "lecture="+listviewitem.Lecnum+ "&state=o" + "&studentid=" + P.id +
+                            "&episode="+episode);
+
+
+
                 }
             });
 
 
-            if (isGPSEnabled && isNetworkEnabled) {
+            if (isGPSEnabled && !cheating) {
                 final List<String> m_lstProviders = locationManager.getProviders(false);
                 locationListener = new LocationListener() {
                     @Override
@@ -399,8 +522,14 @@ public class Attendance_Student extends AppCompatActivity implements Locationinf
                 locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1, locationListener);
                 locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 1, locationListener);
 
+                Log.i(TAG, Double.toString(latPoint));
+                Log.i(TAG, Double.toString(lngPoint));
+                Log.i(TAG, Double.toString(endlatitude));
+                Log.i(TAG, Double.toString(endlongtitude));
+                Log.i(TAG, Double.toString(meterDistanceBetweenPoints(latPoint,lngPoint,endlatitude,endlongtitude)));
                 if(meterDistanceBetweenPoints(latPoint,lngPoint,endlatitude,endlongtitude) < 1000 )//gps허용한계치
                 {
+                    dialog_TV_lecgps.setText("위치인증성공");
                     dialog_button_submit.setEnabled(true);
                 }
                 else

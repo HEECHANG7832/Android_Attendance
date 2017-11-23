@@ -15,6 +15,7 @@ public class listviewitem implements Serializable {
     public String professor;
     public String lecloc;
     public String weekcount;
+    public String ongoing;
 
 
 //    public void setName(String name) {

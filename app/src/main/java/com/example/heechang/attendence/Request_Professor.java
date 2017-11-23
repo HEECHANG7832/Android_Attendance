@@ -123,12 +123,6 @@ public class Request_Professor extends AppCompatActivity {
 //
 //            }
 //        });
-
-    }//end onCreate
-
-    @Override
-    protected void onStart() {
-        super.onStart();
         //수업정보 가져오기
         InsertData task = new InsertData(this, new InsertData.AsyncResponse() {
             @Override
@@ -176,8 +170,8 @@ public class Request_Professor extends AppCompatActivity {
         });
         //Request_Professor.php ==> $sql="select * from lecture where LecPid = '$LecPid'";
         task.execute("http://220.230.117.98/se/Request_Professor.php", "LecPid="+P.id);
+    }//end onCreate
 
-    }
 
     public class ListviewAdapter extends BaseAdapter{
 
@@ -227,6 +221,9 @@ public class Request_Professor extends AppCompatActivity {
                             .setMessage(listviewitem.Lecnum+"\n"+listviewitem.Lecname)
                             .setPositiveButton("네",new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dlg, int sumthin) {
+                                    RandomCode code = new RandomCode();
+                                    String S_code = String.valueOf(code.getRandomCode());
+                                    listviewitem.ongoing = S_code;
                                     InsertData task = new InsertData(context, new InsertData.AsyncResponse() {
                                         @Override
                                         public void getResult(String mJsonString) {
@@ -235,7 +232,7 @@ public class Request_Professor extends AppCompatActivity {
                                         }
                                     });
                                     //lecnum에 해당하는 수업의 ongoing을 1로 바꿔준다.
-                                    task.execute("http://220.230.117.98/se/ongoing.php", "Lecnum="+listviewitem.Lecnum+"&ongoing=1");
+                                    task.execute("http://220.230.117.98/se/ongoing.php", "Lecnum="+listviewitem.Lecnum+"&ongoing="+S_code);
 
                                     Intent i = new Intent(context, Attendance_Live_Professor.class);
                                     i.putExtra("listviewitem", listviewitem);

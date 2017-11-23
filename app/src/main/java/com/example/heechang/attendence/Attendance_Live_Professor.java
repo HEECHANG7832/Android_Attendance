@@ -109,6 +109,9 @@ public class Attendance_Live_Professor extends AppCompatActivity {
         TextView include_professor = (TextView) test1View.findViewById(R.id.listview_subject_professor);
         include_professor.setText(Listviewitem.professor);
 
+        TextView rp_professor_ongoing = (TextView) test1View.findViewById(R.id.rp_professor_ongoing);
+        rp_professor_ongoing.setText("인증번호 : "+Listviewitem.ongoing);
+
         Button cancel = (Button) test1View.findViewById(R.id.listview_BT_start);
         cancel.setText("출석 종료");
         cancel.setOnClickListener(new View.OnClickListener() {

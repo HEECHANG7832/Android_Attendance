@@ -66,23 +66,20 @@ public class Request_Professor extends AppCompatActivity {
 
         context = this;
 
-        //전역변수 P를 사용해서 교수정보 출력하기
-        //학번
-//        rp_professor_num_textview = (TextView)findViewById(R.id.rp_professor_num_textview);
-//        rp_professor_num_textview.setText(P.num.toString());
-//        //이름
-//        rp_professor_name_textview = (TextView)findViewById(R.id.rp_professor_name_textview);
-//        rp_professor_name_textview.setText(P.name.toString());
-//        //부서
-//        rp_professor_department_textview = (TextView)findViewById(R.id.rp_professor_department_textview);
-//        rp_professor_department_textview.setText(P.department.toString());
-        //사진가져와서 사진출력
-        //rp_professor_image_imageview.setBackground();
+        rp_professor_num_textview = (TextView)findViewById(R.id.rp_professor_num_textview);
+        rp_professor_num_textview.setText(P.id.toString());
+        //이름
+        rp_professor_name_textview = (TextView)findViewById(R.id.rp_professor_name_textview);
+        rp_professor_name_textview.setText(P.name.toString());
+        //부서
+        rp_professor_department_textview = (TextView)findViewById(R.id.rp_professor_department_textview);
+        rp_professor_department_textview.setText(P.department.toString());
+
         Thread mThread = new Thread(){
             @Override
             public void run(){
                 try {
-                    URL url = new URL("220.230.117.98/se/6.jpg");
+                    URL url = new URL("http://220.230.117.98/se/"+P.picturepath);
                     HttpURLConnection conn = null;
                     try {
                         conn = (HttpURLConnection)url.openConnection();
@@ -91,7 +88,6 @@ public class Request_Professor extends AppCompatActivity {
 
                         InputStream is = conn.getInputStream();
                         bitmap = BitmapFactory.decodeStream(is);
-                        Log.i(TAG, "6.jpg success");
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -179,7 +175,7 @@ public class Request_Professor extends AppCompatActivity {
             }
         });
         //Request_Professor.php ==> $sql="select * from lecture where LecPid = '$LecPid'";
-        task.execute("http://220.230.117.98/se/login.php", "LecPid=profchoi");
+        task.execute("http://220.230.117.98/se/Request_Professor.php", "LecPid="+P.id);
 
     }
 

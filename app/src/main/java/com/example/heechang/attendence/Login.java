@@ -55,9 +55,9 @@ public class Login extends AppCompatActivity {
         login_enter_button = (Button) findViewById(R.id.login_enter_button);
         login_enter_button.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
+
                 final String IDtemp = login_id_editText.getText().toString();
                 String Passwordtemp = md5(login_pw_editText.getText().toString());
-
                 InsertData task = new InsertData(context, new InsertData.AsyncResponse() {
                     @Override
                     public void getResult(String mJsonString) {

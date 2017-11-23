@@ -84,16 +84,16 @@ public class Attendance_Student extends AppCompatActivity implements Locationinf
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_attendence_student);
 
-//        //전역변수 P를 사용해서 학생정보 출력하기
-//        //학번
-//        as_student_num_textview = (TextView)findViewById(R.id.as_student_num_textview);
-//        as_student_num_textview.setText(P.num.toString());
-//        //이름
-//        as_student_name_textview = (TextView)findViewById(R.id.as_student_name_textview);
-//        as_student_name_textview.setText(P.name.toString());
-//        //부서
-//        as_student_department_textview = (TextView)findViewById(R.id.as_student_department_textview);
-//        as_student_department_textview.setText(P.department.toString());
+        //전역변수 P를 사용해서 학생정보 출력하기
+        //학번
+        as_student_num_textview = (TextView)findViewById(R.id.as_student_num_textview);
+        as_student_num_textview.setText(P.id.toString());
+        //이름
+        as_student_name_textview = (TextView)findViewById(R.id.as_student_name_textview);
+        as_student_name_textview.setText(P.name.toString());
+        //부서
+        as_student_department_textview = (TextView)findViewById(R.id.as_student_department_textview);
+        as_student_department_textview.setText(P.department.toString());
 
         //사진가져와서 사진출력
         as_student_image_imageview = (ImageView)findViewById(R.id.as_student_image_imageview);
@@ -101,7 +101,7 @@ public class Attendance_Student extends AppCompatActivity implements Locationinf
             @Override
             public void run(){
                 try {
-                    URL url = new URL("220.230.117.98/se/"+P.picturepath);
+                    URL url = new URL("http://220.230.117.98/se/"+P.picturepath);
                     HttpURLConnection conn = null;
                     try {
                         conn = (HttpURLConnection)url.openConnection();
@@ -113,6 +113,7 @@ public class Attendance_Student extends AppCompatActivity implements Locationinf
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
+
 
                 } catch (MalformedURLException e) {
                     e.printStackTrace();
@@ -129,7 +130,7 @@ public class Attendance_Student extends AppCompatActivity implements Locationinf
         {
 
         }
-        //as_student_image_imageview.setBackground();
+
 
 
         //페어링 목록 출력하는 ListView

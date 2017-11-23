@@ -130,13 +130,40 @@ public class Attendance_Live_Professor extends AppCompatActivity {
             }
         });
 
-    }//end onCreate
-
-    @Override
-    protected void onStart() {
-        super.onStart();
         //attendance 테이블을 완료하고
         //학생 이름과 출석상태를 가져와서 listview를 채우는 코드작성
+        InsertData task = new InsertData(context, new InsertData.AsyncResponse() {
+            @Override
+            public void getResult(String mJsonString) {
+                Log.i(TAG, mJsonString);
+                //json파싱
+                try {
+                    JSONObject jsonObject = new JSONObject(mJsonString);
+                    JSONArray jsonArray = jsonObject.getJSONArray("episode");
+
+                    for (int i = 0; i < jsonArray.length(); i++) {
+
+                        JSONObject item = jsonArray.getJSONObject(i);
+
+                        String studentid = item.getString("studentid");
+                        String studentname = item.getString("studentname");
+                        String state = item.getString("state");
+
+//                        HashMap<String,String> hashMap = new HashMap<>();
+//                        hashMap.put("Lecnum", Lecnum);
+                        //hArrayList.add(hashMap);
+
+                        //리스트뷰에 어뎁터 통해서 추가
+                        adapter.addItem(studentid, studentname, state);
+                    }
+
+                } catch (JSONException e) {
+
+                    Log.d(TAG, "showResult : ", e);
+                }
+            }
+        });
+        task.execute("http://220.230.117.98/se/bring_attendance_info.php", "tableInfo=" + Listviewitem.Lecnum + "&episode=1");
 
         timerTask = new TimerTask() {
             @Override
@@ -154,7 +181,7 @@ public class Attendance_Live_Professor extends AppCompatActivity {
 
                                 JSONObject item = jsonArray.getJSONObject(i);
 
-                                String episode = item.getString("episode");
+                                String studentid = item.getString("studentid");
                                 String studentname = item.getString("studentname");
                                 String state = item.getString("state");
 
@@ -163,7 +190,8 @@ public class Attendance_Live_Professor extends AppCompatActivity {
                                 //hArrayList.add(hashMap);
 
                                 //리스트뷰에 어뎁터 통해서 추가
-                                adapter.addItem(studentname, state);
+                                adapter.compareItem(studentid,state);
+                                adapter.notifyDataSetChanged();
 
                             }
 
@@ -173,16 +201,14 @@ public class Attendance_Live_Professor extends AppCompatActivity {
                         }
                     }
                 });
-                task.execute("http://220.230.117.98/se/bring_attendance_info.php", "tableInfo=" + Listviewitem.Lecnum + "&episode=" + episode);
+                task.execute("http://220.230.117.98/se/bring_attendance_info.php", "tableInfo=" + Listviewitem.Lecnum + "&episode=1");
 
             }
         };
-
-
         timer = new Timer();
         timer.schedule(timerTask,0,3000);
 
-    }
+    }//end onCreate
 
     public class ListviewAdapter extends BaseAdapter {
 
@@ -208,7 +234,7 @@ public class Attendance_Live_Professor extends AppCompatActivity {
 
             //수업번호, 수업이름, 수업일, 출석주차, 수강인원, 교수명
             TextView listview_student_name = (TextView) convertView.findViewById(R.id.ls_student_name);
-            TextView listview_student_status = (TextView) convertView.findViewById(R.id.ls_student_status);
+            final TextView listview_student_status = (TextView) convertView.findViewById(R.id.ls_student_status);
 
             //임시 final
             final listview_student Listview_student = studentlist.get(position);
@@ -224,15 +250,16 @@ public class Attendance_Live_Professor extends AppCompatActivity {
             ls_BT_absence.setOnClickListener(new Button.OnClickListener() {
                 public void onClick(View v) {
                     //state --> x
-                    //state --> x
                     InsertData task = new InsertData(context, new InsertData.AsyncResponse() {
                         @Override
                         public void getResult(String mJsonString) {
                             Log.i(TAG, mJsonString); //success of failure
+                            if(mJsonString.equals("success"))
+                                listview_student_status.setText("x");
                         }
                     });
                     //lecnum에 해당하는 수업의 ongoing을 0로 바꿔준다.
-                    task.execute("http://220.230.117.98/se/set_state_prof.php", "lecture=cse2002&state=o&studentid=ycdoh&episode=1");
+                    task.execute("http://220.230.117.98/se/set_state_prof.php", "lecture="+Listviewitem.Lecnum+"&state=x&studentid="+Listview_student.name+"&episode=1");
                 }
             });
             Button ls_BT_late = (Button) convertView.findViewById(R.id.ls_BT_late);
@@ -251,12 +278,23 @@ public class Attendance_Live_Professor extends AppCompatActivity {
             return convertView;
         }
 
-        public void addItem(String studentname, String state) {
+        public void addItem(String studentid, String studentname, String state) {
             listview_student item = new listview_student();
+            item.id = studentid;
             item.name = studentname;
             item.state = state;
 
             studentlist.add(item);
+        }
+
+        public void compareItem(String studentname, String state) {
+
+            for(int i = 0; i < studentlist.size(); i++)
+            {
+                if(studentlist.get(i).id.equals(studentname) && !studentlist.get(i).state.equals(state))
+                    studentlist.get(i).state = state;
+            }
+
         }
 
     }

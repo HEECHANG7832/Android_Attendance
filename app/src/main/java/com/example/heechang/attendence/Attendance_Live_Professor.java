@@ -23,7 +23,15 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by ycdoh on 2017-11-12.
@@ -35,6 +43,12 @@ public class Attendance_Live_Professor extends AppCompatActivity {
 
     private ListView AL_listview;
     private ListviewAdapter adapter;
+    private Calendar calendar;
+    private String episode;
+    private String startdate;
+    private String currentdate;
+    private TimerTask timerTask;
+    private Timer timer;
 
     private listviewitem Listviewitem;
     private Context context;
@@ -47,6 +61,30 @@ public class Attendance_Live_Professor extends AppCompatActivity {
 
         context = this;
 
+        calendar = new GregorianCalendar(Locale.KOREA);
+        currentdate = Integer.toString(calendar.get(Calendar.YEAR)) + "-" + Integer.toString(calendar.get(Calendar.MONTH)) + "-" + Integer.toString(calendar.get(Calendar.DAY_OF_MONTH));
+        startdate = "2017-09-06";
+
+        try {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+            Date beginDate = formatter.parse(startdate);
+            Date endDate = formatter.parse(currentdate);
+
+            // 시간차이를 시간,분,초를 곱한 값으로 나누면 하루 단위가 나옴
+            long diff = endDate.getTime() - beginDate.getTime();
+            long diffDays = diff / (24 * 60 * 60 * 1000);
+
+            if(diffDays%7 == 0)
+            {
+                episode = Integer.toString((int)diffDays/7 * 2 + 1);
+            }
+            else
+            {
+                episode = Integer.toString((int)diffDays/7 * 2 + 2);
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
         AL_listview = (ListView) findViewById(R.id.rp_subject_listview);
         adapter = new ListviewAdapter();
         AL_listview.setAdapter(adapter);
@@ -79,6 +117,7 @@ public class Attendance_Live_Professor extends AppCompatActivity {
                 //출석체크 종료
                 //ongoing --> 0;
                 //finish();
+                timerTask.cancel();
                 InsertData task = new InsertData(context, new InsertData.AsyncResponse() {
                     @Override
                     public void getResult(String mJsonString) {
@@ -99,40 +138,49 @@ public class Attendance_Live_Professor extends AppCompatActivity {
         //attendance 테이블을 완료하고
         //학생 이름과 출석상태를 가져와서 listview를 채우는 코드작성
 
-        InsertData task = new InsertData(context, new InsertData.AsyncResponse() {
+        timerTask = new TimerTask() {
             @Override
-            public void getResult(String mJsonString) {
-                    Log.i(TAG, mJsonString);
-                //json파싱
-                try {
-                    JSONObject jsonObject = new JSONObject(mJsonString);
-                    JSONArray jsonArray = jsonObject.getJSONArray("episode");
+            public void run() {
+                InsertData task = new InsertData(context, new InsertData.AsyncResponse() {
+                    @Override
+                    public void getResult(String mJsonString) {
+                        Log.i(TAG, mJsonString);
+                        //json파싱
+                        try {
+                            JSONObject jsonObject = new JSONObject(mJsonString);
+                            JSONArray jsonArray = jsonObject.getJSONArray("episode");
 
-                    for (int i = 0; i < jsonArray.length(); i++) {
+                            for (int i = 0; i < jsonArray.length(); i++) {
 
-                        JSONObject item = jsonArray.getJSONObject(i);
+                                JSONObject item = jsonArray.getJSONObject(i);
 
-                        String episode = item.getString("episode");
-                        String studentname = item.getString("studentname");
-                        String state = item.getString("state");
+                                String episode = item.getString("episode");
+                                String studentname = item.getString("studentname");
+                                String state = item.getString("state");
 
 //                        HashMap<String,String> hashMap = new HashMap<>();
 //                        hashMap.put("Lecnum", Lecnum);
-                        //hArrayList.add(hashMap);
+                                //hArrayList.add(hashMap);
 
-                        //리스트뷰에 어뎁터 통해서 추가
-                        adapter.addItem(studentname, state);
+                                //리스트뷰에 어뎁터 통해서 추가
+                                adapter.addItem(studentname, state);
 
+                            }
+
+                        } catch (JSONException e) {
+
+                            Log.d(TAG, "showResult : ", e);
+                        }
                     }
+                });
+                task.execute("http://220.230.117.98/se/bring_attendance_info.php", "tableInfo=" + Listviewitem.Lecnum + "&episode=" + episode);
 
-                } catch (JSONException e) {
-
-                    Log.d(TAG, "showResult : ", e);
-                }
             }
-        });
-        //lecnum에 해당하는 수업의 ongoing을 0로 바꿔준다.
-        task.execute("http://220.230.117.98/se/bring_attendance_info.php", "tableInfo=cse2002&episode=1");
+        };
+
+
+        timer = new Timer();
+        timer.schedule(timerTask,0,3000);
 
     }
 
@@ -176,6 +224,15 @@ public class Attendance_Live_Professor extends AppCompatActivity {
             ls_BT_absence.setOnClickListener(new Button.OnClickListener() {
                 public void onClick(View v) {
                     //state --> x
+                    //state --> x
+                    InsertData task = new InsertData(context, new InsertData.AsyncResponse() {
+                        @Override
+                        public void getResult(String mJsonString) {
+                            Log.i(TAG, mJsonString); //success of failure
+                        }
+                    });
+                    //lecnum에 해당하는 수업의 ongoing을 0로 바꿔준다.
+                    task.execute("http://220.230.117.98/se/set_state_prof.php", "lecture=cse2002&state=o&studentid=ycdoh&episode=1");
                 }
             });
             Button ls_BT_late = (Button) convertView.findViewById(R.id.ls_BT_late);
